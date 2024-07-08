@@ -8,7 +8,7 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r'reports', api_views.ReportViewSet)
-router.register(r'report', api_views.ReportNestedViewSet)
+router.register(r'report', api_views.ReportNestedViewSet, basename="router_report")
 router.register(r'formats', api_views.FormatViewSet)
 router.register(r'filterfields', api_views.FilterFieldViewSet)
 router.register(r'contenttypes', api_views.ContentTypeViewSet)
