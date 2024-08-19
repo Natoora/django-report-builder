@@ -6,6 +6,7 @@ import {
   withLatestFrom,
   catchError,
   delay,
+  filter,
 } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
@@ -27,12 +28,15 @@ import {
 } from '../selectors';
 import { MatSnackBar } from '@angular/material/snack-bar';
 const { ReportActionTypes } = fromReports;
+import { getConfigLoaded } from '../selectors/config';
 
 @Injectable()
 export class ReportEffects {
   @Effect()
   getReports$: Observable<Action> = this.actions$.pipe(
     ofType(ReportActionTypes.GET_REPORT_LIST),
+    withLatestFrom(this.store$.select(getConfigLoaded)),
+    filter(([_, configLoaded]) => configLoaded),
     mergeMap(() =>
       this.api
         .getReports()
