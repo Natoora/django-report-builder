@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny
 from ..models import Report, Format, FilterField, get_allowed_models
 from .serializers import (
     ReportNestedSerializer, ReportSerializer, FormatSerializer,
@@ -32,7 +32,7 @@ def find_exact_position(fields_list, item):
 class ReportBuilderViewMixin:
     """ Set up explicit settings so that project defaults
     don't interfer with report builder's api. """
-    permission_classes = (IsAdminUser,)
+    permission_classes = (AllowAny,)
     pagination_class = None
 
 class ConfigView(ReportBuilderViewMixin, APIView):
