@@ -22,7 +22,7 @@ export class NetworkErrorInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    // Respect base URL tag
+    // const baseUrl = 'http://ws-staging.natoora.com/reports/';
     const baseUrl = document.getElementsByTagName('base')[0].href;
     const apiReq = request.clone({ url: `${baseUrl}${request.url}` });
 

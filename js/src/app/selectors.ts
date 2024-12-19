@@ -4,6 +4,11 @@ import * as reportSelectors from './selectors/reports';
 import * as configSelectors from './selectors/config';
 
 const getConfigState = (state: State) => state.config;
+
+export const getIsConfigLoaded = createSelector(
+  getConfigState,
+  configSelectors.getIsConfigLoaded
+);
 export const getIsAsyncReport = createSelector(
   getConfigState,
   configSelectors.getIsAsyncReport

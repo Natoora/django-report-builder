@@ -3,18 +3,21 @@ import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
-import { tap, map, filter } from 'rxjs/operators';
+import { tap, map, filter, switchMap } from 'rxjs/operators';
 
 import * as fromReports from '../actions/reports';
 import { RouterActionTypes, Go } from '../actions/router';
-import { RouterStateUrl } from '../reducers';
+import { RouterStateUrl, State } from '../reducers';
+import { select, Store } from '@ngrx/store';
+import { getIsConfigLoaded } from '../selectors';
 
 @Injectable()
 export class RouterEffects {
   constructor(
     private actions$: Actions,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private store: Store<State>
   ) {}
 
   @Effect({ dispatch: false })
@@ -41,16 +44,26 @@ export class RouterEffects {
   @Effect()
   routeChange$ = this.actions$.pipe(
     ofType(ROUTER_NAVIGATION),
-    map((action: RouterNavigationAction<RouterStateUrl>) => {
-      const route = action.payload.routerState;
-      if (route.url === '/') {
-        return new fromReports.GetReportList();
-      }
-      if (route.params.id) {
-        return new fromReports.GetReport(route.params.id);
-      }
-      return null;
-    }),
+    map(
+      (action: RouterNavigationAction<RouterStateUrl>) =>
+        action.payload.routerState
+    ),
+    switchMap(route =>
+      this.store.pipe(
+        select(getIsConfigLoaded),
+        filter(isLoaded => isLoaded),
+        map(() => {
+          if (route.url === '/') {
+            return new fromReports.GetReportList();
+          }
+          if (route.params.id) {
+            return new fromReports.GetReport(route.params.id);
+          }
+
+          return null;
+        })
+      )
+    ),
     filter(Boolean)
   );
 }

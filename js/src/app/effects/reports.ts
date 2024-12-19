@@ -6,6 +6,7 @@ import {
   withLatestFrom,
   catchError,
   delay,
+  switchMap,
 } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
@@ -33,7 +34,7 @@ export class ReportEffects {
   @Effect()
   getReports$: Observable<Action> = this.actions$.pipe(
     ofType(ReportActionTypes.GET_REPORT_LIST),
-    mergeMap(() =>
+    switchMap(() =>
       this.api
         .getReports()
         .pipe(map(reports => new fromReports.SetReportList(reports)))
@@ -52,7 +53,7 @@ export class ReportEffects {
   getReport$: Observable<Action> = this.actions$.pipe(
     ofType(ReportActionTypes.GET_REPORT),
     map((action: fromReports.GetReport) => action.payload),
-    mergeMap(reportId =>
+    switchMap(reportId =>
       this.api
         .getReport(reportId)
         .pipe(map(report => new fromReports.GetReportSuccess(report)))
@@ -276,26 +277,23 @@ export class ReportEffects {
   );
 
   @Effect()
-  checkExportStatus$ = ({
-    delayTime = 500,
-    scheduler = asyncScheduler
-  } = {}) => this.actions$.pipe(
-    ofType(ReportActionTypes.CHECK_EXPORT_STATUS),
-    delay(delayTime, scheduler),
-    mergeMap(
-      ({ payload: { reportId, taskId } }: fromReports.CheckExportStatus) =>
-        this.api.checkStatus({ reportId, taskId }).pipe(
-          map(({ state, link }) => {
-            if (state === 'SUCCESS') {
-              return new fromReports.DownloadExportedReport(link);
-            } else if (state === 'FAILURE') {
-              return new fromReports.CancelExportReport();
-            } else {
-              return new fromReports.CheckExportStatus({ reportId, taskId });
-            }
-          })
-        )
-    )
-  );
-
+  checkExportStatus$ = ({ delayTime = 500, scheduler = asyncScheduler } = {}) =>
+    this.actions$.pipe(
+      ofType(ReportActionTypes.CHECK_EXPORT_STATUS),
+      delay(delayTime, scheduler),
+      mergeMap(
+        ({ payload: { reportId, taskId } }: fromReports.CheckExportStatus) =>
+          this.api.checkStatus({ reportId, taskId }).pipe(
+            map(({ state, link }) => {
+              if (state === 'SUCCESS') {
+                return new fromReports.DownloadExportedReport(link);
+              } else if (state === 'FAILURE') {
+                return new fromReports.CancelExportReport();
+              } else {
+                return new fromReports.CheckExportStatus({ reportId, taskId });
+              }
+            })
+          )
+      )
+    );
 }
