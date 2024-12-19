@@ -23,9 +23,9 @@ urlpatterns = [
     re_path(r'^api/', include(router.urls)),
     re_path(r'^api/config/', api_views.ConfigView.as_view()),
     re_path(r'^api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    re_path(r'^api/related_fields', staff_member_required(api_views.RelatedFieldsView.as_view()), name="related_fields"),
-    re_path(r'^api/fields', staff_member_required(api_views.FieldsView.as_view()), name="fields"),
-    re_path(r'^api/report/(?P<report_id>\w+)/generate/', staff_member_required(api_views.GenerateReport.as_view()), name="generate_report"),
+    re_path(r'^api/related_fields', api_views.RelatedFieldsView.as_view(), name="related_fields"),
+    re_path(r'^api/fields', api_views.FieldsView.as_view(), name="fields"),
+    re_path(r'^api/report/(?P<report_id>\w+)/generate/', api_views.GenerateReport.as_view(), name="generate_report"),
     re_path(r'^api/report/(?P<pk>\d+)/download_file/(?P<filetype>.+)/$', views.DownloadFileView.as_view(), name="report_download_file"),
     re_path(r'^api/report/(?P<pk>\d+)/check_status/(?P<task_id>.+)/$', views.check_status, name="report_check_status"),
     re_path('^report/(?P<pk>\d+)/$', views.ReportSPAView.as_view(), name="report_update_view"),
@@ -33,5 +33,5 @@ urlpatterns = [
 
 if not hasattr(settings, 'REPORT_BUILDER_FRONTEND') or settings.REPORT_BUILDER_FRONTEND:
     urlpatterns += [
-        re_path(r'^', staff_member_required(views.ReportSPAView.as_view()), name="report_builder"),
+        re_path(r'^', views.ReportSPAView.as_view(), name="report_builder"),
     ]
